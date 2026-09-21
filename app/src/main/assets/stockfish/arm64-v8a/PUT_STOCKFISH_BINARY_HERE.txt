@@ -1,0 +1,1 @@
+Place the official Android ARM64 Stockfish executable here as 'stockfish'.
