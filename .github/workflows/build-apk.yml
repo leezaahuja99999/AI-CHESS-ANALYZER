@@ -1,0 +1,51 @@
+name: Build AI CHESS ANALYZER APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout app
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and NDK
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.2.12479018"
+
+      - name: Build Stockfish for Android ARM64
+        run: |
+          git clone --depth 1 --branch sf_19 https://github.com/official-stockfish/Stockfish.git /tmp/Stockfish
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
+          export PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+          make -C /tmp/Stockfish/src -j2 build COMP=ndk arch=armv8 bits=64
+          mkdir -p app/src/main/assets/stockfish/arm64-v8a
+          cp /tmp/Stockfish/src/stockfish app/src/main/assets/stockfish/arm64-v8a/stockfish
+          chmod +x app/src/main/assets/stockfish/arm64-v8a/stockfish
+
+      - name: Build debug APK
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-CHESS-ANALYZER-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
