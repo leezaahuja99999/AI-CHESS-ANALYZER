@@ -22,11 +22,7 @@ android {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(
-            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
-        )
-    }
+    jvmToolchain(21)
 }
 
 dependencies {
