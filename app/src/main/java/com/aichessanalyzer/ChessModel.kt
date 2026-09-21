@@ -13,7 +13,9 @@ class ChessModel {
     fun turnIsWhite() = board.sideToMove == Side.WHITE
 
     fun reset() {
-        board.reset()
+        board.loadFromFen(
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        )
         history.clear()
         cursor = 0
     }
